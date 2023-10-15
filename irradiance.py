@@ -32,8 +32,6 @@ def parse_args ():
 
 API_KEY = "FhVfzpADNNmu6UUyNaXRCZYI5bZyOjFkb3OWQNmx"
 EMAIL = "stuart.baxley@gmail.com"
-#BASE_URL = "https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-2-2-tmy-download.csv?"
-#BASE_URL = "https://developer.nrel.gov/api/solar/nsrdb_data_query.csv?"
 BASE_URL = "https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-download.csv?"
 
 
@@ -66,26 +64,11 @@ def pull_nsrdb_data(location, year = None):
                ]
 
         url = BASE_URL + '&'.join(info)
-        #url = BASE_URL + urllib.parse.urlencode(input_data, True)+f"&wkt=POINTS({location.latitude} {location.longitude})"
-        #url = BASE_URL + f"api_key={API_KEY}&wkt=POINT(91.287 23.832)"
-        print(url)
-        try:
-            data = pd.read_csv(url)#, index_col=False)
-        except:
-            return input_data
+        # some error handling would be nice...
+        data = pd.read_csv(url)#, index_col=False)
         data = data.to_csv(index=False)
     else:
-        headers = {
-            'x-api-key': API_KEY
-        }
-        data = get_response_json_and_handle_errors(requests.post(BASE_URL, input_data, headers=headers))
-        download_url = data['outputs']['downloadUrl']
-        # You can do with what you will the download url
-        print(data['outputs']['message'])
-        print(f"Data can be downloaded from this url when ready: {download_url}")
-
-        # Delay for 1 second to prevent rate limiting
-        time.sleep(1)
+        raise Exception("Only CSV supported at this time...")
     print(f'Processed')
     return data
 
