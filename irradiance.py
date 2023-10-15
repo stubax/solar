@@ -32,8 +32,6 @@ def parse_args ():
     return parser.parse_args()
 
 
-#API_KEY = "FhVfzpADNNmu6UUyNaXRCZYI5bZyOjFkb3OWQNmx"
-#EMAIL = "stuart.baxley@gmail.com"
 API_KEY = config["API_KEY"]
 EMAIL = config["EMAIL"]
 BASE_URL = "https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-download.csv?"
