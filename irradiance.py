@@ -10,6 +10,8 @@ import urllib.parse
 import time
 import requests
 
+from user_cfg import config
+
 
 def parse_args ():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -29,8 +31,6 @@ def parse_args ():
                         help = "Boolean syntax placeholder")
     return parser.parse_args()
 
-
-from user_cfg import config
 
 #API_KEY = "FhVfzpADNNmu6UUyNaXRCZYI5bZyOjFkb3OWQNmx"
 #EMAIL = "stuart.baxley@gmail.com"
@@ -69,11 +69,10 @@ def pull_nsrdb_data(location, year = None):
 
         url = BASE_URL + '&'.join(info)
         # some error handling would be nice...
-        data = pd.read_csv(url)#, index_col=False)
+        data = pd.read_csv(url)
         data = data.to_csv(index=False)
     else:
         raise Exception("Only CSV supported at this time...")
-    print(f'Processed')
     return data
 
 
