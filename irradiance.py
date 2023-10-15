@@ -76,25 +76,6 @@ def pull_nsrdb_data(location, year = None):
     return data
 
 
-def get_response_json_and_handle_errors(response: requests.Response) -> dict:
-    if response.status_code != 200:
-        print(f"An error has occurred with the server or the request. The request response code/status: {response.status_code} {response.reason}")
-        print(f"The response body: {response.text}")
-        exit(1)
-
-    try:
-        response_json = response.json()
-    except:
-        print(f"The response couldn't be parsed as JSON, likely an issue with the server, here is the text: {response.text}")
-        exit(1)
-
-    if len(response_json['errors']) > 0:
-        errors = '\n'.join(response_json['errors'])
-        print(f"The request errored out, here are the errors: {errors}")
-        exit(1)
-    return response_json
-
-
 if __name__ == "__main__":
     opts = parse_args()
 
