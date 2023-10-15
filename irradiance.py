@@ -34,8 +34,8 @@ def parse_args ():
 
 #API_KEY = "FhVfzpADNNmu6UUyNaXRCZYI5bZyOjFkb3OWQNmx"
 #EMAIL = "stuart.baxley@gmail.com"
-API_KEY = config["Stuart"]["API_KEY"]
-EMAIL = config["Stuart"]["EMAIL"]
+API_KEY = config["API_KEY"]
+EMAIL = config["EMAIL"]
 BASE_URL = "https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-download.csv?"
 
 
@@ -79,5 +79,5 @@ def pull_nsrdb_data(location, year = None):
 if __name__ == "__main__":
     opts = parse_args()
 
-    location = pvlib.location.Location(opts.latitude, opts.longitude, altitude=opts.altitude, name="tmy")
+    location = pvlib.location.Location(opts.latitude, opts.longitude, altitude=opts.altitude, name="name")
     data = pull_nsrdb_data(location)
