@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 
 import argparse
-import pvlib
-import pandas as pd
-import matplotlib.pyplot as plt
 import datetime
-import numpy
-import urllib.parse
-import time
-import requests
+import matplotlib.pyplot as plt
+import pandas as pd
+
+import pvlib
+from pvlib.pvsystem import PVSystem, Array, FixedMount
+from pvlib.modelchain import ModelChain
 
 from user_cfg import config
 
@@ -27,10 +26,10 @@ def parse_args ():
                         help = "latitude of location")
     parser.add_argument("--longitude", dest="longitude", type=float,
                         help = "longitude of location")
-    parser.add_argument("--altitude", dest="altitude", type=float,
+    parser.add_argument("--altitude", dest="altitude", type=float, default=None,
                         help = "longitude of location")
-    parser.add_argument("--place_holder", dest="place_holder", action="store_true", default=False,
-                        help = "Boolean syntax placeholder")
+#    parser.add_argument("--place_holder", dest="place_holder", action="store_true", default=False,
+#                        help = "Boolean syntax placeholder")
     return parser.parse_args()
 
 
@@ -71,13 +70,39 @@ def pull_nsrdb_data(location, year = None):
                ]
 
         url = BASE_URL + '&'.join(info)
-        print(url)
         # some error handling would be nice...
         data = pd.read_csv(url)
         data = data.to_csv(index=False)
     else:
         raise Exception("Only CSV supported at this time...")
     return data
+
+
+def get_generic_components():
+    sandia_modules = pvlib.pvsystem.retrieve_sam('SandiaMod')
+    module = sandia_modules['Canadian_Solar_CS5P_220M___2009_']
+    sapm_inverters = pvlib.pvsystem.retrieve_sam('cecinverter')
+    inverter = sapm_inverters['ABB__MICRO_0_25_I_OUTD_US_208__208V_']
+    temperature_model_parameters = pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
+    return inverter, module, temperature_model_parameters
+
+
+def generic_pv_system():
+    inverter, module, temperature_model_parameters = get_generic_components()
+
+    mount = FixedMount(surface_tilt=location.latitude, surface_azimuth=180)
+    array = Array(
+            mount=mount,
+            module_parameters=module,
+            temperature_model_parameters=temperature_model_parameters,
+        )
+    return PVSystem(arrays=[array], inverter_parameters=inverter)
+
+
+def run_energy_model(location, weather, pv_system):
+    mc = ModelChain(pv_system, location)
+    mc.run_model(weather)
+    return mc
 
 
 def get_file_lines(filename):
@@ -138,8 +163,12 @@ def csv_file_to_df(filename):
 if __name__ == "__main__":
     opts = parse_args()
 
-    location = pvlib.location.Location(opts.latitude, opts.longitude, altitude=opts.altitude, name="tmy")
+    location = pvlib.location.Location(opts.latitude, opts.longitude, altitude=opts.altitude, name="generic-name")
     data = pull_nsrdb_data(location, year="2020")
 
     #df = csv_file_to_df()
-    df = csv_lines_to_df(data.split("\n"))
+    weather = csv_lines_to_df(data.split("\n"))
+
+    pv_system = generic_pv_system()
+
+    irradiance_model = run_energy_model(location, weather, pv_system)
